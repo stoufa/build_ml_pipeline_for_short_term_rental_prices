@@ -1,0 +1,22 @@
+name: download_file
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip=20.3.3
+  - requests=2.24.0
+  - mlflow=1.28.0
+  - pip:
+      - wandb==0.10.31
+      # - git+https://github.com/udacity/nd0821-c2-build-model-workflow-starter.git#egg=wandb-utils&subdirectory=components
+      - scipy==1.10
+      - numpy==1.20
+
+# the additional pip dependencies (scipy and numpy)
+# are there to fix the AttributeError: module 'numpy' has no attribute 'object'
+
+# the upgraded mlflow (v1.28.0) is needed to avoid the param length exceeded error
+
+# the upgraded wandb (v0.10.31) is needed to avoid the AttributeError: module 'collections' has no attribute 'MutableSet'
+# https://stackoverflow.com/questions/74006130/attributeerror-module-collections-has-no-attribute-mutableset
+

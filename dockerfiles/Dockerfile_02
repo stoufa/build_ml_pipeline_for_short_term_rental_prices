@@ -1,0 +1,29 @@
+FROM python:3.6-slim-buster
+
+RUN apt update
+RUN apt install wget -y
+
+# Anaconda 5.2.0 is the last version supporting Python 3.6
+# https://repo.anaconda.com/archive/
+RUN wget https://repo.anaconda.com/archive/Anaconda3-5.2.0-Linux-x86_64.sh
+
+# bzip2 is used in the anaconda script
+RUN apt-get install bzip2 -y
+
+# installing anaconda in silent mode
+# setting the installation path to /anaconda
+RUN bash Anaconda3-5.2.0-Linux-x86_64.sh -b -p /anaconda
+
+# add /anaconda/bin to PATH
+ENV PATH=/anaconda/bin:${PATH}
+
+# fix of the InvalidVersionSpecError: Invalid version spec: =2.7
+# https://stackoverflow.com/questions/66888763/invalidversionspecerror-invalid-version-spec-2-7
+# RUN conda create -n nyc_airbnb_dev python conda==4.9.2 -y
+# RUN conda activate nyc_airbnb_dev
+
+WORKDIR /project
+
+COPY . .
+
+CMD ["bash"]

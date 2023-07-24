@@ -1,11 +1,11 @@
 import json
 
-import mlflow
 import tempfile
 import os
 import wandb
 import hydra
 from omegaconf import DictConfig
+import mlflow
 
 _steps = [
     "download",
@@ -16,7 +16,7 @@ _steps = [
     # NOTE: We do not include this in the steps so it is not run by mistake.
     # You first need to promote a model export to "prod" before you can run this,
     # then you need to run this step explicitly
-#    "test_regression_model"
+    #    "test_regression_model"
 ]
 
 
@@ -28,17 +28,26 @@ def go(config: DictConfig):
     os.environ["WANDB_PROJECT"] = config["main"]["project_name"]
     os.environ["WANDB_RUN_GROUP"] = config["main"]["experiment_name"]
 
+    # You can get the path at the root of the MLflow project with this:
+    root_path = hydra.utils.get_original_cwd()
+
     # Steps to execute
     steps_par = config['main']['steps']
     active_steps = steps_par.split(",") if steps_par != "all" else _steps
+    print('[DEBUG]', active_steps)
 
     # Move to a temporary directory
     with tempfile.TemporaryDirectory() as tmp_dir:
+        print('[DEBUG]', tmp_dir)
 
         if "download" in active_steps:
             # Download file and load in W&B
+            print('[DEBUG]', os.path.join(root_path, "components", "get_data"))
+
             _ = mlflow.run(
                 f"{config['main']['components_repository']}/get_data",
+                # "get_data",
+                # os.path.join(root_path, "components", "get_data"),
                 "main",
                 version='main',
                 parameters={
@@ -68,11 +77,12 @@ def go(config: DictConfig):
             pass
 
         if "train_random_forest" in active_steps:
-
             # NOTE: we need to serialize the random forest configuration into JSON
             rf_config = os.path.abspath("rf_config.json")
             with open(rf_config, "w+") as fp:
-                json.dump(dict(config["modeling"]["random_forest"].items()), fp)  # DO NOT TOUCH
+                # DO NOT TOUCH
+                json.dump(
+                    dict(config["modeling"]["random_forest"].items()), fp)
 
             # NOTE: use the rf_config we just created as the rf_config parameter for the train_random_forest
             # step
