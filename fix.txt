@@ -2,6 +2,11 @@ The only solution that worked for me is to manually activate the main (the one c
 
 - https://stackoverflow.com/questions/75621657/how-to-fix-np-object-will-be-defined-as-the-corresponding-numpy-scalar-in-kera
 
+> note, this happened in the training step too since mlflow is one of that step dependencies.
+$ conda activate mlflow-cd3b4f52f7dead4ede9554d420a1b9da8d8db1e3
+$ pip install numpy==1.23.4
+$ conda activate nyc_airbnb_dev
+$ # re-run failed step
 
 to fix PermissionError: [Errno 13] Permission denied: 'outputs/2023-07-24/12-24-22'
 you need to change the ownership of the corresponding folder/file to the current user

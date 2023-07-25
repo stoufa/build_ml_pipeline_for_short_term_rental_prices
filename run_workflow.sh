@@ -15,4 +15,5 @@ export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION="python"
 # mlflow run . -P steps=download
 # mlflow run . -P steps=basic_cleaning
 # mlflow run . -P steps=data_check
-mlflow run . -P steps=data_split
+# mlflow run . -P steps=data_split
+mlflow run . -P steps=train_random_forest

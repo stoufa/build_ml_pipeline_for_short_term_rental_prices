@@ -199,3 +199,6 @@ pyrightconfig.json
 **/outputs/
 **/artifacts/
 **/wandb/
+
+# model export directory
+src/train_random_forest/random_forest_dir/
