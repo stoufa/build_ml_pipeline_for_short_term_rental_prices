@@ -3,4 +3,5 @@ conda_env: conda.yml
 
 entry_points:
   main:
-    command: jupyter notebook
+    # this should be "jupyter lab" instead of "jupyter notebook" otherwise, you'll get this error message: Jupyter command `jupyter-notebook` not found.
+    command: jupyter lab
