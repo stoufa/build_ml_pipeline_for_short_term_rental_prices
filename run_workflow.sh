@@ -27,4 +27,17 @@ export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION="python"
 
 # "Test" sub step of the "Initial Training" step
 # note that this step require a manual intervention to chose a model and add the "prod" tag to it
-mlflow run . -P steps=test_regression_model
+# mlflow run . -P steps=test_regression_model
+
+# "Train the model on a new data sample" sub step of the "Pipeline Release and Updates" step
+# we should use the ssh url git@gitlab.com:user/project.git (instead of the https version of the url https://github.com/user/project.git) since we're ussing sso on gitlab (i.e. we don't have a user/password pair)
+
+# "successful failure" run
+# mlflow run git@gitlab.com:m.sahli/build_ml_pipeline_for_short_term_rental_prices.git \
+#              -v 1.0.0 \
+#              -P hydra_options="etl.sample='sample2.csv'"
+
+# after applying the geolocation fix
+mlflow run git@gitlab.com:m.sahli/build_ml_pipeline_for_short_term_rental_prices.git \
+             -v 1.0.1 \
+             -P hydra_options="etl.sample='sample2.csv'"
