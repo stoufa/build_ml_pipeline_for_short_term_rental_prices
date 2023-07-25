@@ -16,4 +16,11 @@ export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION="python"
 # mlflow run . -P steps=basic_cleaning
 # mlflow run . -P steps=data_check
 # mlflow run . -P steps=data_split
-mlflow run . -P steps=train_random_forest
+# mlflow run . -P steps=train_random_forest
+
+# "Optimize hyperparameters" sub step of the "Initial Training" step
+# try setting the parameter modeling.max_tfidf_features to 10, 15 and 30,
+# and the modeling.random_forest.max_features to 0.1, 0.33, 0.5, 0.75, 1
+mlflow run . \
+  -P steps=train_random_forest \
+  -P hydra_options="modeling.max_tfidf_features=10,15,30 modeling.random_forest.max_features=0.1,0.33,0.5,0.75,1 -m"
