@@ -104,8 +104,8 @@ def go(config: DictConfig):
             _ = mlflow.run(
                 # when trying to access the step hosted in the remote GitHub repo, I get this error:
                 # AttributeError: 'IterableList' object has no attribute 'origin/master'
-                # Apparently, this is due to the change of the "master" branch to the "main" branch
-                # since we don't have access to that repo, we'll be point to our local copy instead
+                # Apparently, this is due to the change of the "master" branch name to the "main" branch
+                # since we don't have access to that repo, we'll be pointing to our local copy instead
                 # f"{config['main']['components_repository']}/train_val_test_split",
                 # https://github.com/gitpython-developers/GitPython/issues/910
 

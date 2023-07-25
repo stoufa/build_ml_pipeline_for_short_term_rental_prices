@@ -1,7 +1,5 @@
 The only solution that worked for me is to manually activate the main (the one containing mlflow as a dependency, not the steps) mlflow-* environment (created by mlflow, mlflow-39beb38945f7e5378bc314f1ee9f6f4b4376524a in my case) having the error and installing numpy version 1.23.4 in it (pip install numpy==1.23.4) as recommended by this StackOverflow thread!
-
-- https://stackoverflow.com/questions/75621657/how-to-fix-np-object-will-be-defined-as-the-corresponding-numpy-scalar-in-kera
-
+-> https://stackoverflow.com/questions/75621657/how-to-fix-np-object-will-be-defined-as-the-corresponding-numpy-scalar-in-kera
 > note, this happened in the training step too since mlflow is one of that step dependencies.
 $ conda activate mlflow-cd3b4f52f7dead4ede9554d420a1b9da8d8db1e3
 $ pip install numpy==1.23.4
@@ -10,13 +8,10 @@ $ # re-run failed step
 
 to fix PermissionError: [Errno 13] Permission denied: 'outputs/2023-07-24/12-24-22'
 you need to change the ownership of the corresponding folder/file to the current user
-https://askubuntu.com/questions/6723/change-folder-permissions-and-ownership
-
+-> https://askubuntu.com/questions/6723/change-folder-permissions-and-ownership
+this error is due to me trying to use docker to fix deprecation errors and attaching a volume and running stuff from there, this manoeuver created files and folders under the ownership of root instead of the current user (m-sahli in this case)
 $ ll
 drwxr-xr-x  4 root    root     4096 Jul 24 09:49 outputs/
 $ sudo chown -R $USER outputs/
 $ ll
 drwxr-xr-x  4 m-sahli root     4096 Jul 24 09:49 outputs/
-
-
-
