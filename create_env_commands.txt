@@ -1,0 +1,10 @@
+these are the commands used to create the environment:
+* conda create -n nyc_airbnb_dev
+* conda update -n base -c defaults conda
+* conda activate nyc_airbnb_dev
+* conda install mlflow
+
+> numpy error fix (to be applied in the main, train_model, and train_released_model environments)
+* conda activate mlflow-3136541941f39bdac6c1ce0c99d1054662c6cc35
+* pip install numpy==1.23.4
+* conda activate nyc_airbnb_dev

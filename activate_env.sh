@@ -1,1 +1,0 @@
-conda activate nyc_airbnb_dev

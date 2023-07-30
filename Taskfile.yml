@@ -1,0 +1,63 @@
+version: "3"
+dotenv:
+  - ".env"
+env:
+  HYDRA_FULL_ERROR: 1
+  PYTHONWARNINGS: "ignore"
+  PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: "python"
+tasks:
+  create_env:
+    desc: "create the nyc_airbnb_dev conda environment"
+    cmd: conda env create -f environment.yml
+  remove_env:
+    desc: "remove the nyc_airbnb_dev conda environment"
+    cmd: conda env remove -n nyc_airbnb_dev
+  list_envs:
+    desc: "list all available conda environments"
+    cmd: conda env list
+  create_mlflow_step:
+    desc: "create a new mlflow step under the src/ directory using the template in the cookie-mlflow-step/ folder"
+    cmd: cookiecutter cookie-mlflow-step -o src
+  install_precommit_hooks:
+    desc: "install the pre-commit git hooks defined in .pre-commit-config.yaml"
+    cmd: pre-commit install
+  remove_mlflow_envs:
+    desc: "remove **all** the environments having the mlflow prefix"
+    cmd: for e in $(conda info --envs | grep "^mlflow" | cut -f1 -d" "); do conda uninstall --name $e --all -y;done
+  download:
+    desc: "run the download step of the pipeline"
+    cmd: mlflow run . -P steps=download
+  eda:
+    desc: "run the EDA step of the pipeline"
+    cmd: mlflow run src/eda
+  data_clean:
+    desc: "run the data cleaning step of the pipeline"
+    cmd: mlflow run . -P steps=basic_cleaning
+  data_check:
+    desc: "run the data testing step of the pipeline"
+    cmd: mlflow run . -P steps=data_check
+  data_split:
+    desc: "run the data splitting step of the pipeline"
+    cmd: mlflow run . -P steps=data_split
+  train_model:
+    desc: "run the model training step of the pipeline"
+    cmd: mlflow run . -P steps=train_random_forest
+  opt_hyper_params:
+    desc: "run the hyper-parameters optimization step of the pipeline"
+    cmd: |
+      mlflow run . \
+        -P steps=train_random_forest \
+        -P hydra_options="modeling.max_tfidf_features=10,15,30 modeling.random_forest.max_features=0.1,0.33,0.5,0.75,1 -m"
+  prod_model_test:
+    desc: "run tests against the model we wish to deploy in the prod environment"
+    cmd: mlflow run . -P steps=test_regression_model
+  train_model_new_data:
+    desc: "trains the released models on new data"
+    vars:
+      # 1.0.0 -> initial release
+      # 1.0.1 -> release after the geolocation fix
+      MODEL_VERSION: "1.0.1"
+    cmd: |
+      mlflow run git@gitlab.com:$GITLAB_USERNAME/build_ml_pipeline_for_short_term_rental_prices.git \
+                  -v {{.MODEL_VERSION}} \
+                  -P hydra_options="etl.sample='sample2.csv'"

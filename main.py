@@ -6,6 +6,10 @@ import wandb
 import hydra
 from omegaconf import DictConfig
 import mlflow
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
+logger = logging.getLogger()
 
 _steps = [
     "download",
@@ -21,9 +25,8 @@ _steps = [
 
 
 # This automatically reads in the configuration
-@hydra.main(config_name='config')
+@hydra.main(config_name="config")
 def go(config: DictConfig):
-
     # Setup the wandb experiment. All runs will be grouped under this name
     os.environ["WANDB_PROJECT"] = config["main"]["project_name"]
     os.environ["WANDB_RUN_GROUP"] = config["main"]["experiment_name"]
@@ -32,29 +35,29 @@ def go(config: DictConfig):
     root_path = hydra.utils.get_original_cwd()
 
     # Steps to execute
-    steps_par = config['main']['steps']
+    steps_par = config["main"]["steps"]
     active_steps = steps_par.split(",") if steps_par != "all" else _steps
-    print('[DEBUG]', active_steps)
+    logger.info(f"[DEBUG] {active_steps}")
 
     # Move to a temporary directory
     with tempfile.TemporaryDirectory() as tmp_dir:
-        print('[DEBUG]', tmp_dir)
+        logger.info(f"[DEBUG] {tmp_dir}")
 
         if "download" in active_steps:
             # Download file and load in W&B
-            print('[DEBUG]', os.path.join(root_path, "components", "get_data"))
+            logger.info(f'[DEBUG] {os.path.join(root_path, "components", "get_data")}')
 
             _ = mlflow.run(
                 f"{config['main']['components_repository']}/get_data",
                 # "get_data",
                 # os.path.join(root_path, "components", "get_data"),
                 "main",
-                version='main',
+                version="main",
                 parameters={
                     "sample": config["etl"]["sample"],
                     "artifact_name": "sample.csv",
                     "artifact_type": "raw_data",
-                    "artifact_description": "Raw file as downloaded"
+                    "artifact_description": "Raw file as downloaded",
                 },
             )
 
@@ -63,18 +66,15 @@ def go(config: DictConfig):
             # Implement here #
             ##################
             _ = mlflow.run(
-                os.path.join(
-                    root_path,
-                    "src", "basic_cleaning"
-                ),
+                os.path.join(root_path, "src", "basic_cleaning"),
                 "main",
                 parameters={
                     "input_artifact": "sample.csv:latest",
                     "output_artifact": "clean_sample.csv",
                     "output_type": "clean_sample",
                     "output_description": "Data with outliers and null values removed",
-                    "min_price": config['etl']['min_price'],
-                    "max_price": config['etl']['max_price']
+                    "min_price": config["etl"]["min_price"],
+                    "max_price": config["etl"]["max_price"],
                 },
             )
 
@@ -83,17 +83,14 @@ def go(config: DictConfig):
             # Implement here #
             ##################
             _ = mlflow.run(
-                os.path.join(
-                    root_path,
-                    "src", "data_check"
-                ),
+                os.path.join(root_path, "src", "data_check"),
                 "main",
                 parameters={
                     "csv": "clean_sample.csv:latest",
                     "ref": "clean_sample.csv:reference",
                     "kl_threshold": config["data_check"]["kl_threshold"],
                     "min_price": config["etl"]["min_price"],
-                    "max_price": config["etl"]["max_price"]
+                    "max_price": config["etl"]["max_price"],
                 },
             )
 
@@ -108,18 +105,13 @@ def go(config: DictConfig):
                 # since we don't have access to that repo, we'll be pointing to our local copy instead
                 # f"{config['main']['components_repository']}/train_val_test_split",
                 # https://github.com/gitpython-developers/GitPython/issues/910
-
-                os.path.join(
-                    root_path,
-                    "components", "train_val_test_split"
-                ),
-
+                os.path.join(root_path, "components", "train_val_test_split"),
                 "main",
                 parameters={
                     "input": "clean_sample.csv:latest",
-                    "test_size": config['modeling']['test_size'],
-                    "random_seed": config['modeling']['random_seed'],
-                    "stratify_by": config['modeling']['stratify_by']
+                    "test_size": config["modeling"]["test_size"],
+                    "random_seed": config["modeling"]["random_seed"],
+                    "stratify_by": config["modeling"]["stratify_by"],
                 },
             )
 
@@ -128,8 +120,7 @@ def go(config: DictConfig):
             rf_config = os.path.abspath("rf_config.json")
             with open(rf_config, "w+") as fp:
                 # DO NOT TOUCH
-                json.dump(
-                    dict(config["modeling"]["random_forest"].items()), fp)
+                json.dump(dict(config["modeling"]["random_forest"].items()), fp)
 
             # NOTE: use the rf_config we just created as the rf_config parameter for the train_random_forest
             # step
@@ -139,10 +130,7 @@ def go(config: DictConfig):
             ##################
 
             _ = mlflow.run(
-                os.path.join(
-                    root_path,
-                    "src", "train_random_forest"
-                ),
+                os.path.join(root_path, "src", "train_random_forest"),
                 "main",
                 parameters={
                     "trainval_artifact": "trainval_data.csv:latest",
@@ -152,21 +140,17 @@ def go(config: DictConfig):
                     "rf_config": rf_config,
                     "max_tfidf_features": config["modeling"]["max_tfidf_features"],
                     # Use the name random_forest_export as output_artifact
-                    "output_artifact": "random_forest_export"
+                    "output_artifact": "random_forest_export",
                 },
             )
 
         if "test_regression_model" in active_steps:
-
             ##################
             # Implement here #
             ##################
 
             _ = mlflow.run(
-                os.path.join(
-                    root_path,
-                    "components", "test_regression_model"
-                ),
+                os.path.join(root_path, "components", "test_regression_model"),
                 "main",
                 parameters={
                     "mlflow_model": "random_forest_export:prod",

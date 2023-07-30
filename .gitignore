@@ -206,3 +206,6 @@ src/train_random_forest/random_forest_dir/
 
 # multi-run folder
 multirun
+
+# the project's "internal kitchen" (failed attempts, backup files, ...)
+.private

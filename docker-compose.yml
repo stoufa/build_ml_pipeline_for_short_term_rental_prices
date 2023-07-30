@@ -1,7 +1,0 @@
-services:
-  app:
-    build: .
-    container_name: udacity_project
-    # command: bash
-    volumes:
-      - .:/project
