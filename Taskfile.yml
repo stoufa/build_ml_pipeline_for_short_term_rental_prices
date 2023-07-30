@@ -21,6 +21,9 @@ tasks:
   install_precommit_hooks:
     desc: "install the pre-commit git hooks defined in .pre-commit-config.yaml"
     cmd: pre-commit install
+  list_mlflow_envs:
+    desc: "list all the environments having the mlflow prefix"
+    cmd: conda info --envs | grep "^mlflow" | cut -f1 -d" "
   remove_mlflow_envs:
     desc: "remove **all** the environments having the mlflow prefix"
     cmd: for e in $(conda info --envs | grep "^mlflow" | cut -f1 -d" "); do conda uninstall --name $e --all -y;done
